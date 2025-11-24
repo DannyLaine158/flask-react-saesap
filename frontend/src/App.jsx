@@ -4,12 +4,16 @@ import SearchBar from './components/SearchBar';
 import Loader from './components/Loader';
 import SongGrid from './components/SongGrid';
 import Title from './components/Title';
+import ButtonHistory from './components/ButtonHistory';
 
 function App() {
+  // Variables de estado
   const [ search, setSearch ] = useState('');
   const [ results, setResults ] = useState([]);
   const [ loading, setLoading ] = useState(false);
   const [ selectedSong, setSelectedSong ] = useState(null);
+  const [ history, setHistory ] = useState([]);
+  const [ breadcrumbs, setBreadcrumbs ] = useState([]);
 
   // search = 'Queen'
 
@@ -19,8 +23,11 @@ function App() {
     stopAllAudio();
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5001/search?q=${search}`);
+      const res = await fetch(`https://flask-react-saesap-backend.onrender.com/search?q=${search}`);
       const data = await res.json();
+
+      if (results.length > 0)
+        setHistory(prev => [...prev, results]);
 
       // Agregando la lista de python a una lista de JS
       setResults(data);
@@ -38,8 +45,11 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:5001/recommend/${id}`);
+      const res = await fetch(`https://flask-react-saesap-backend.onrender.com/recommend/${id}`);
       const data = await res.json();
+
+      if (results.length > 0)
+        setHistory(prev => [...prev, results]);
 
       console.log(data);
       setResults(data);
@@ -65,6 +75,11 @@ function App() {
         search={search} 
         setSearch={setSearch} 
         onSearch={handleSearch} />
+
+      { history.length > 0 && <ButtonHistory 
+        stopAllAudio={stopAllAudio} setHistory={setHistory} 
+        setResults={setResults} history={history} />
+      }
 
       { loading && <Loader /> }
 
